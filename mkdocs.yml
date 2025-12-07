@@ -1,0 +1,36 @@
+site_name: Model Drift Experiment
+site_description: A comprehensive guide to the Model Drift Experiment codebase.
+site_author: Antigravity
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - content.code.copy
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - API Reference: api.md
+  - Models:
+    - CNN: models/cnn.md
+    - BERT: models/bert.md
+  - Drift Detection: drift.md
