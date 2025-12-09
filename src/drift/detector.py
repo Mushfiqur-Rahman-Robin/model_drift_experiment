@@ -1,7 +1,10 @@
+import logging
 from typing import Any
 
 import numpy as np
 from scipy.stats import ks_2samp
+
+logger = logging.getLogger(__name__)
 
 
 class DriftDetector:
@@ -20,6 +23,7 @@ class DriftDetector:
         Compare reference embeddings with current embeddings.
         Returns a dictionary with drift status and statistics.
         """
+        logger.debug(f"Starting drift detection with threshold: {self.threshold}")
         # Ensure 2D arrays
         if reference_embeddings.ndim == 1:
             reference_embeddings = reference_embeddings.reshape(-1, 1)
@@ -54,6 +58,16 @@ class DriftDetector:
         drift_ratio = drifted_features_count / features_to_check
         drift_detected = drift_ratio > 0.1
 
+        if drift_detected:
+            logger.warning(
+                f"Drift detected in {drifted_features_count}/{features_to_check} features (ratio: {drift_ratio:.2f}) "
+                f"with average p-value: {np.mean(p_values):.4f}"
+            )
+        else:
+            logger.info(
+                f"No significant drift detected. {drifted_features_count}/{features_to_check} features drifted "
+                f"(ratio: {drift_ratio:.2f}), average p-value: {np.mean(p_values):.4f}"
+            )
         return {
             "drift_detected": drift_detected,
             "drift_ratio": drift_ratio,

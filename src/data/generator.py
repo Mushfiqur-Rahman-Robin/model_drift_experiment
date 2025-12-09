@@ -1,7 +1,10 @@
+import logging
+
 import numpy as np
 
 
 class DriftGenerator:
+    logger = logging.getLogger(__name__)
     """
     Injects drift into data to simulate production scenarios.
     """
@@ -12,6 +15,7 @@ class DriftGenerator:
         Add Gaussian noise to images to simulate concept drift / covariate shift.
         Severity: 0.0 to 1.0 (noise level)
         """
+        DriftGenerator.logger.debug(f"Applying image drift with severity: {severity}")
         # Using numpy.random for simulation purposes to avoid Bandit B311 warning
         noise = np.random.normal(loc=0.0, scale=severity, size=images.shape)
         drifted_images = images + noise
@@ -23,6 +27,7 @@ class DriftGenerator:
         Inject typos or random words to simulate text drift.
         Severity: probability of modifying a sentence.
         """
+        DriftGenerator.logger.debug(f"Applying text drift with severity: {severity}")
         drifted_texts = []
         vocab = ["drift", "noise", "error", "unknown", "###", "!!!"]
 

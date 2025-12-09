@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from src.models.cnn import CNNModel
 from src.models.bert import BERTModel
+import unittest.mock
 
 @pytest.mark.unit
 class TestModels:
@@ -64,6 +65,17 @@ class TestModels:
         data_4d = np.random.rand(2, 1, 28, 28).astype(np.float32)
         tensor_4d = model._preprocess(data_4d)
         assert tensor_4d.shape == (2, 1, 28, 28)
+
+    def test_cnn_clear_already_cleared(self):
+        model = CNNModel()
+        model.model = None # Ensure model is already None
+        
+        # We expect a debug log message, so we'll mock logging
+        with unittest.mock.patch("src.models.cnn.logger.debug") as mock_debug:
+            model.clear()
+            mock_debug.assert_called_once_with("CNN model 'simple_cnn' is already cleared.")
+        assert model.model is None # Ensure it remains None
+
 
 from src.models.base import BaseModel
 class ConcreteModel(BaseModel):

@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -5,12 +7,13 @@ import torch.nn.functional as F  # noqa
 
 from .base import BaseModel
 
+logger = logging.getLogger(__name__)
+
 
 class SimpleCNN(nn.Module):
     """A simple CNN for image classification (e.g., MNIST-like)."""
 
     def __init__(self):
-        # UP008: Use super() instead of super(__class__, self)
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
@@ -38,8 +41,16 @@ class CNNModel(BaseModel):
 
     def load(self) -> None:
         """Initialize the CNN model."""
+        if self.model is not None:
+            logger.debug(f"CNN model '{self.model_name}' already loaded.")
+            return
+
+        logger.info(
+            f"Initializing CNN model '{self.model_name}' to device: {self.device}."
+        )
         self.model = SimpleCNN().to(self.device)
         self.model.eval()
+        logger.info(f"CNN model '{self.model_name}' initialized successfully.")
 
     def predict(self, data: np.ndarray) -> list[int]:
         """
@@ -48,6 +59,7 @@ class CNNModel(BaseModel):
         """
         if self.model is None:
             self.load()
+            logger.debug(f"CNN model '{self.model_name}' loaded for prediction.")
 
         tensor_data = self._preprocess(data)
         with torch.no_grad():
@@ -59,6 +71,7 @@ class CNNModel(BaseModel):
         """Extract features from the penultimate layer."""
         if self.model is None:
             self.load()
+            logger.debug(f"CNN model '{self.model_name}' loaded for get_embeddings.")
 
         tensor_data = self._preprocess(data)
         with torch.no_grad():
@@ -76,3 +89,11 @@ class CNNModel(BaseModel):
 
         tensor = torch.FloatTensor(data).to(self.device)
         return tensor
+
+    def clear(self) -> None:
+        """Clear the model from memory."""
+        if self.model is not None:
+            logger.info(f"Clearing CNN model '{self.model_name}' from memory.")
+            self.model = None
+        else:
+            logger.debug(f"CNN model '{self.model_name}' is already cleared.")

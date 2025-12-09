@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 import numpy as np
@@ -5,6 +6,8 @@ import torch
 from transformers import BertModel, BertTokenizer
 
 from .base import BaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class BERTModel(BaseModel):
@@ -19,10 +22,17 @@ class BERTModel(BaseModel):
 
     def load(self) -> None:
         """Load BERT model and tokenizer."""
+        if self.model is not None:
+            logger.debug(f"BERT model '{self.model_name}' already loaded.")
+            return
+
         from ..config import config
 
         cache_dir = config.MODEL_DIR / "bert"
         cache_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(
+            f"Loading BERT model '{self.model_name}' from cache_dir: {cache_dir} to device: {self.device}"
+        )
 
         self.tokenizer = BertTokenizer.from_pretrained(
             self.model_name, cache_dir=cache_dir
@@ -31,6 +41,7 @@ class BERTModel(BaseModel):
             self.device
         )
         self.model.eval()
+        logger.info(f"BERT model '{self.model_name}' loaded successfully.")
 
     def predict(self, data: list[str]) -> Any:
         """
@@ -47,6 +58,7 @@ class BERTModel(BaseModel):
         """Get BERT embeddings (CLS token)."""
         if self.model is None:
             self.load()
+            logger.debug(f"BERT model '{self.model_name}' loaded for get_embeddings.")
 
         inputs = self.tokenizer(
             data, return_tensors="pt", padding=True, truncation=True, max_length=128
@@ -56,3 +68,12 @@ class BERTModel(BaseModel):
             # Use CLS token embedding
             embeddings = outputs.last_hidden_state[:, 0, :]
         return embeddings.cpu().numpy()
+
+    def clear(self) -> None:
+        """Clear the model from memory."""
+        if self.model is not None:
+            logger.info(f"Clearing BERT model '{self.model_name}' from memory.")
+            self.model = None
+            self.tokenizer = None
+        else:
+            logger.debug(f"BERT model '{self.model_name}' is already cleared.")

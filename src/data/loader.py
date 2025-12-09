@@ -1,7 +1,10 @@
+import logging
+
 import numpy as np
 
 
 class DataLoader:
+    logger = logging.getLogger(__name__)
     """
     Simulates data loading for the experiment.
     We use synthetic data to avoid downloading large datasets.
@@ -13,6 +16,7 @@ class DataLoader:
         Generate synthetic MNIST-like data (28x28 grayscale images).
         Returns: (images, labels)
         """
+        DataLoader.logger.debug(f"Generating {n_samples} synthetic MNIST-like images.")
         # Random noise images for base distribution
         images = np.random.rand(n_samples, 28, 28).astype(np.float32)
         # Random labels 0-9
@@ -24,6 +28,7 @@ class DataLoader:
         """
         Generate synthetic text data.
         """
+        DataLoader.logger.debug(f"Generating {n_samples} synthetic text sentences.")
         base_sentences = [
             "The quick brown fox jumps over the lazy dog.",
             "I love machine learning and artificial intelligence.",
